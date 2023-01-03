@@ -1,0 +1,117 @@
+syntax = "proto3";
+package user;
+option go_package = "github.com/fdboarelli/user/service/api";
+
+import "third_party/google/api/annotations.proto";
+import "third_party/google/protobuf/empty.proto";
+
+// Service Api
+service UserService {
+
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/users"
+      body: "*"
+    };
+  }
+
+  rpc UpdateUser (UpdateUserRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      put: "/api/v1/users"
+      body: "*"
+    };
+  }
+
+  rpc DeleteUser (DeleteUserRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/users/{id}"
+      body: "*"
+    };
+  }
+
+  rpc GetUsers (GetUsersRequest) returns (GetUserResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users"
+    };
+  }
+
+  rpc GetStatus (google.protobuf.Empty) returns (StatusReply) {
+    option (google.api.http) = {
+      get: "/api/v1/health-check"
+    };
+  }
+
+}
+
+/* Model */
+message CreateUserRequest {
+  string firstname = 1;
+  string lastname = 2;
+  string nickname = 3;
+  string password = 4;
+  string email = 5;
+  Country country = 6;
+}
+
+message CreateUserResponse {
+  User user = 1;
+}
+
+message UpdateUserRequest {
+  string id = 1;
+  optional string firstname = 2;
+  optional string lastname = 3;
+  optional string nickname = 4;
+  optional string password = 5;
+  optional string email = 6;
+  optional Country country = 7;
+}
+
+message DeleteUserRequest {
+  string id = 1;
+}
+
+message GetUsersRequest {
+  optional Country filter_country = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+}
+
+message GetUserResponse {
+  int64 page = 1;
+  int64 page_size = 2;
+  int64 total_count = 3;
+  repeated User results = 4;
+}
+
+message User {
+  string id = 1;
+  string firstname = 2;
+  string lastname = 3;
+  string nickname = 4;
+  string email = 5;
+  Country country = 6;
+  string created_at = 7;
+  string updated_at = 8;
+}
+
+/* Enums */
+
+enum Country {
+  UNKNOWN = 0;
+  EN = 1;
+  IT = 2;
+  FR = 3;
+  DE = 4;
+}
+
+/* GetStatus */
+enum ServiceStatus {
+  DOWN = 0;
+  UP = 1;
+};
+
+message StatusReply {
+  ServiceStatus status = 1;
+  string message = 2;
+}

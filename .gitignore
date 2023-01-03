@@ -1,0 +1,7 @@
+# Ignore Idea file
+.DS_Store
+.idea
+.data
+/client/coverage.out
+/service/coverage.out
+/user

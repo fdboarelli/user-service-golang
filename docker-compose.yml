@@ -1,0 +1,62 @@
+version: "3"
+services:
+  # User Service
+  user-service:
+    image: "user-service-local:latest"
+    container_name: "user-service-dev"
+    ports:
+      - "9090:9090"
+    environment:
+      - MONGODB_HOST=mongodb://root:root@mongo-db:27017
+      - KAFKA_SERVER=broker:9092
+    restart: always
+    depends_on:
+      - broker
+      - mongo-db
+    networks:
+      - shared-net
+  # Mongo DB service
+  mongo-db:
+    image: "mongo"
+    container_name: "mongodb-dev"
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    volumes:
+      - './data:/data/db'
+    networks:
+      - shared-net
+  # Zookeeper service
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.5.0
+    container_name: zookeeper
+    networks:
+      - shared-net
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+  # Kafka service
+  broker:
+    image: confluentinc/cp-kafka:5.5.0
+    container_name: broker
+    networks:
+      - shared-net
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: [ "CMD", "kafka-topics.sh", "--list", "--zookeeper", "zookeeper:2181" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+# Custom network for all services
+networks:
+  shared-net:
+    driver: bridge
