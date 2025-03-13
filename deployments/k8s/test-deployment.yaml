@@ -14,7 +14,7 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: mongodb-secret-1
+  name: mongodb-secret-1-b
 type: Opaque
 data:
   username: testuser

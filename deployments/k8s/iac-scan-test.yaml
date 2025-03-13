@@ -1,0 +1,65 @@
+bases:
+  - ../../environments/environments.yaml
+
+repositories:
+  - name: jetstack
+    url: https://charts.jetstack.io
+
+releases:
+  - name: cert-manager
+    namespace: cert-manager
+    kubeContext: {{ .Environment.Values.global_kubecontext }}
+    createNamespace: true
+    chart: jetstack/cert-manager
+    version: v1.9.1
+    values:
+      - installCRDs: true
+      - extraArgs:
+          - --dns01-recursive-nameservers=1.1.1.1:53
+          - --dns01-recursive-nameservers-only
+      - replicaCount: 2
+      - securityContext:
+          fsGroup: 0
+          runAsUser: 0
+          runAsGroup: 0
+          runAsNonRoot: false
+      - containerSecurityContext:
+          readOnlyRootFilesystem: true
+      - prometheus:
+          enabled: true
+          servicemonitor:
+            enabled: true
+      - nodeSelector:
+          node-role.kubernetes.io/master: "true"
+      - webhook:
+          replicaCount: 2
+          nodeSelector:
+            node-role.kubernetes.io/master: "true"
+          securityContext:
+            fsGroup: 0
+            runAsUser: 0
+            runAsGroup: 0
+            runAsNonRoot: false
+          containerSecurityContext:
+            readOnlyRootFilesystem: true
+      - cainjector:
+          replicaCount: 2
+          nodeSelector:
+            node-role.kubernetes.io/master: "true"
+          securityContext:
+            fsGroup: 0
+            runAsUser: 0
+            runAsGroup: 0
+            runAsNonRoot: false
+          containerSecurityContext:
+            readOnlyRootFilesystem: true
+      - startupapicheck:
+          nodeSelector:
+            node-role.kubernetes.io/master: "true"
+          securityContext:
+            fsGroup: 0
+            runAsUser: 0
+            runAsGroup: 0
+            runAsNonRoot: false
+          containerSecurityContext:
+            readOnlyRootFilesystem: true
